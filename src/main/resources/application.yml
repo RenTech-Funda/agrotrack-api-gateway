@@ -1,0 +1,38 @@
+server:
+  port: 8080 # Puerto único donde correrá el punto de entrada global
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    compatibility-verifier:
+      enabled: false
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*" # Permitirá que el Frontend en Angular se conecte sin errores de CORS
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+            allowedHeaders: "*"
+      routes:
+        # RUTA 1: IAM SERVICE (Autenticación)
+        - id: iam-service
+          uri: ${IAM_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/v1/authentication/**
+
+        # RUTA 2: PROFILE SERVICE (Perfiles)
+        - id: profile-service
+          uri: ${PROFILE_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/v1/profiles/**
+
+        # RUTA 3: ORGANIZATION SERVICE (Terrenos/Parcelas)
+        - id: organization-service
+          uri: ${ORGANIZATION_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/v1/plots/**,/api/v1/organizations/**
