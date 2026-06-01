@@ -30,9 +30,13 @@ spring:
           uri: ${PROFILE_SERVICE_URL:http://localhost:8082}
           predicates:
             - Path=/api/v1/profiles/**
+          filters:
+            - AuthenticationFilter
 
         # RUTA 3: ORGANIZATION SERVICE (Terrenos/Parcelas)
         - id: organization-service
           uri: ${ORGANIZATION_SERVICE_URL:http://localhost:8083}
           predicates:
             - Path=/api/v1/plots/**,/api/v1/organizations/**
+          filters:
+            - AuthenticationFilter
