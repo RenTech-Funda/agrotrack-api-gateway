@@ -1,5 +1,5 @@
 server:
-  port: 8080 # Puerto único donde correrá el punto de entrada global
+  port: ${PORT:8080} # Puerto único donde correrá el punto de entrada global
 
 spring:
   application:
