@@ -1,6 +1,5 @@
 package com.agrotrack.api_gateway.config;
 
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,25 +54,22 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
             try {
                 // Validar criptográficamente la firma del token y extraer los datos
                 SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
-                Claims claims = Jwts.parser()
+                Jwts.parser()
                         .verifyWith(key)
                         .build()
-                        .parseSignedClaims(token)
-                        .getPayload();
+                        .parseSignedClaims(token);
 
-                // Inyección: Modificar la petición agregando cabeceras personalizadas en texto plano
+                // La identidad viaja exclusivamente en el JWT. Se eliminan las cabeceras
+                // de identidad proporcionadas por el cliente para evitar suplantaciones.
                 ServerHttpRequest mutatedRequest = request.mutate()
                         .headers(headers -> {
                             headers.remove("X-User-Id");
                             headers.remove("X-User-Role");
                             headers.remove("X-User-Name");
-                            headers.set("X-User-Id", String.valueOf(claims.get("userId", Long.class)));
-                            headers.set("X-User-Role", claims.get("role", String.class));
-                            headers.set("X-User-Name", claims.getSubject());
                         })
                         .build();
 
-                // Pasa la petición mutada (con las nuevas cabeceras inyectadas) al microservicio
+                // El microservicio vuelve a validar el Bearer token y obtiene de allí userId y role.
                 return chain.filter(exchange.mutate().request(mutatedRequest).build());
 
             } catch (Exception e) {
