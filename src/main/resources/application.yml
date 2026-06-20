@@ -1,6 +1,10 @@
 server:
   port: ${PORT:8080} # Puerto único donde correrá el punto de entrada global
 
+authorization:
+  jwt:
+    secret: ${AUTHORIZATION_JWT_SECRET}
+
 spring:
   application:
     name: api-gateway
@@ -37,6 +41,14 @@ spring:
         - id: organization-service
           uri: ${ORGANIZATION_SERVICE_URL:http://localhost:8083}
           predicates:
-            - Path=/api/v1/plots/**,/api/v1/organizations/**
+            - Path=/api/v1/plots/**,/api/v1/organizations/**,/api/v1/plant-types/**
+          filters:
+            - AuthenticationFilter
+
+        # RUTA 4: SUBSCRIPTION SERVICE
+        - id: subscription-service
+          uri: ${SUBSCRIPTION_SERVICE_URL:http://localhost:8085}
+          predicates:
+            - Path=/api/v1/subscriptions/**
           filters:
             - AuthenticationFilter

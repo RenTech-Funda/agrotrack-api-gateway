@@ -13,6 +13,8 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -20,7 +22,9 @@ import java.nio.charset.StandardCharsets;
 @Component
 public class AuthenticationFilter extends AbstractGatewayFilterFactory<AuthenticationFilter.Config> {
 
-    @Value("${authorization.jwt.secret:unaclavesecretasuperlargayseguraenlocal123456!}")
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationFilter.class);
+
+    @Value("${authorization.jwt.secret}")
     private String jwtSecret;
 
     public AuthenticationFilter() {
@@ -59,15 +63,21 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 
                 // Inyección: Modificar la petición agregando cabeceras personalizadas en texto plano
                 ServerHttpRequest mutatedRequest = request.mutate()
-                        .header("X-User-Id", String.valueOf(claims.get("userId", Long.class)))
-                        .header("X-User-Role", claims.get("role", String.class))
-                        .header("X-User-Name", claims.getSubject())
+                        .headers(headers -> {
+                            headers.remove("X-User-Id");
+                            headers.remove("X-User-Role");
+                            headers.remove("X-User-Name");
+                            headers.set("X-User-Id", String.valueOf(claims.get("userId", Long.class)));
+                            headers.set("X-User-Role", claims.get("role", String.class));
+                            headers.set("X-User-Name", claims.getSubject());
+                        })
                         .build();
 
                 // Pasa la petición mutada (con las nuevas cabeceras inyectadas) al microservicio
                 return chain.filter(exchange.mutate().request(mutatedRequest).build());
 
             } catch (Exception e) {
+                LOGGER.warn("JWT validation failed: {}", e.getMessage());
                 return onError(exchange, "Unauthorized access: Invalid token", HttpStatus.UNAUTHORIZED);
             }
         };
