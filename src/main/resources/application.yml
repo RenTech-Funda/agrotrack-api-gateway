@@ -60,7 +60,7 @@ spring:
         - id: monitoring-service
           uri: ${MONITORING_SERVICE_URL:http://localhost:8084}
           predicates:
-            - Path=/api/v1/environment-readings/*,/api/v1/tasks/,/api/v1/plant-sampling-sessions/,/api/v1/monitoring/*
+            - Path=/api/v1/environment-readings/**,/api/v1/tasks/**,/api/v1/plant-sampling-sessions/**,/api/v1/monitoring/**
           filters:
             - AuthenticationFilter
         # RUTA 6: REPORTS SERVICE
