@@ -12,6 +12,8 @@ spring:
     compatibility-verifier:
       enabled: false
     gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
       globalcors:
         cors-configurations:
           '[/**]':
