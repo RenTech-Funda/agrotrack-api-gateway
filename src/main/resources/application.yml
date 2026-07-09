@@ -52,3 +52,17 @@ spring:
             - Path=/api/v1/subscriptions/**
           filters:
             - AuthenticationFilter
+        # RUTA 5: MONITORING AND CONTROL SERVICE
+        - id: monitoring-control-service
+          uri: ${MONITORING_CONTROL_SERVICE_URL:http://localhost:8086}
+          predicates:
+            - Path=/api/v1/environment-readings/**,/api/v1/plant-sampling-sessions/**,/api/v1/tasks/**
+          filters:
+            - AuthenticationFilter
+        # RUTA 6: REPORTS SERVICE
+        - id: reports-service
+          uri: ${REPORTS_SERVICE_URL:http://localhost:8087}
+          predicates:
+            - Path=/api/v1/reports/**, /api/v1/organizations/*/plots/*/reports
+          filters:
+            - AuthenticationFilter
