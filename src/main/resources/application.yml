@@ -21,6 +21,7 @@ spring:
               - POST
               - PUT
               - DELETE
+              - PATCH
             allowedHeaders: "*"
       routes:
         # RUTA 1: IAM SERVICE (Autenticación)
